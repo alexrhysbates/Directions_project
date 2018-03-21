@@ -1,0 +1,48 @@
+#This program calculates the route and tells you the duration of the journey
+
+from datetime import datetime, timedelta, date
+import requests
+
+origin = input('Your starting point is ')
+destination = input('Your destination is ')
+
+api_key = 'AIzaSyCrs5jjoXepUXFXzIC-ih4szm-sWv600G8'
+
+url = 'https://maps.googleapis.com/maps/api/directions/json?origin={origin}&destination={destination}4&key={key}'
+
+response = requests.get(url.format(origin=origin,destination=destination,key=api_key))
+data = response.json()
+
+start_address = data['routes'][0]['legs'][0]['start_address']
+end_address = data['routes'][0]['legs'][0]['end_address']
+duration = data['routes'][0]['legs'][0]['duration']['text']
+
+current_time = datetime.now()
+duration = int(data['routes'][0]['legs'][0]['duration']['value'])
+duration = timedelta(0,duration)
+arrival_time = current_time + duration
+
+with open('route.html','w') as f:
+
+    f.write('\n'+'Your starting point is '+origin)
+    f.write('<br>')
+    f.write('\n'+'Your destination is '+destination)
+    f.write('<br>')
+    f.write('<br>')
+
+    for i in range(len(data['routes'][0]['legs'][0]['steps'])):
+
+        distance = data['routes'][0]['legs'][0]['steps'][i]['distance']['text']
+
+        f.write('\n'+data['routes'][0]['legs'][0]['steps'][i]['html_instructions']+'for {distance}'.format(distance=distance))
+        f.write('<br>')
+        f.write('<br>')
+
+    f.write('\n'+'You have now arrived at your destination')
+    f.write('<br>')
+    f.write('<br>')
+
+    f.write('\n'+'It will take {time}'.format(time=duration))
+    f.write('<br>')
+    f.write('\n'+'You will arrive at'+arrival_time.strftime('%H:%M'))
+    f.write('<br>')
